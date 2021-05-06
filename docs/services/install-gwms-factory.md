@@ -27,7 +27,7 @@ Before starting the installation process, consider the following points (consult
 #### Host and OS
 
    - A host to install the **GlideinWMS Factory** (pristine node). 
-   - Currently most of our testing has been done on Scientific Linux 6 and 7.
+   - Currently most of our testing has been done on Scientific Linux 7.
    - Root access
 
 The GlideinWMS Factory has the following requirements:
@@ -407,22 +407,19 @@ Each frontend needs a line that maps to the user specified in the identity argum
 
 ### Reconfiguring GlideinWMS ###
 
-After changing the configuration of GlideinWMS and making sure that Factory is running, use the following table to find the appropriate command for your operating system (run as `root`):
-
-| If your operating system is... | Run the following command...                 |
-|:-------------------------------|:---------------------------------------------|
-| Enterprise Linux 7             | `systemctl reload gwms-factory` |
-| Enterprise Linux 6             | `service gwms-factory reconfig`  |
+After changing the configuration of GlideinWMS and making sure that Factory is running,  perform the following command as `root`:
+ :::console
+ root@host # systemctl reload gwms-factory 
 
 !!! note
-    Notice that, in the case of Enterprise Linux 7 `systemctl reload gwms-factory` will work only if:
+    Be aware that, `systemctl reload gwms-factory` will work only if:
     - gwms-factory service is running
     - gwms-factory service was started with systemctl
     
     Otherwise, you will get the following error in any of the cases:
 
         :::console
-        # systemctl reload gwms-factory
+        root@host # systemctl reload gwms-factory
         Job for gwms-factory.service invalid.
 
 
@@ -430,19 +427,13 @@ After changing the configuration of GlideinWMS and making sure that Factory is r
 
 Before you start the Factory service for the first time or after an update of the RPM or after you change GlideinWMS scripts, you should always use the GlideinWMS "upgrade" command. To do so:
 
-1. Make sure the `condor` and `gwms-factory` services are stopped (in EL6 this will be done for you).
+1. Make sure the `condor` and `gwms-factory` services are stopped. 
 
 1. Issue the upgrade command:
     
-   - If you are using Enterprise Linux 7:
-
         :::console
         root@host # /usr/sbin/gwms-factory upgrade
 
-   - If you are using Enterprise Linux 6:
-
-        :::console
-        root@host # service gwms-factory upgrade
 
 1. Start the `condor` and `gwms-factory` services (see next part).
 
@@ -467,12 +458,6 @@ To revert to a version of GlideinWMS lower than 3.5, you need to restore the job
 To *start the Factory* you must start also **HTCondor** and the **Web server** beside the Factory itself:
 
 ``` console
-# %RED%For RHEL 6, CentOS 6, and SL6%ENDCOLOR%
-root@host # service condor start
-root@host # service httpd start
-root@host # service gwms-factory start
-
-# %RED% For RHEL 7, CentOS 7, and SL7%ENDCOLOR%
 root@host # systemctl start condor
 root@host # systemctl start httpd
 root@host # systemctl start gwms-factory
@@ -482,37 +467,23 @@ root@host # systemctl start gwms-factory
     Once you successfully start using the Factory service, anytime you change the `/etc/gwms-factory/glideinWMS.xml` file you will need to run a reconfig/reload command. If you change also some code you need the upgrade command mentioned above:
     
 ``` console
-# %RED% For RHEL 6, CentOS 6, and SL6%ENDCOLOR%
-root@host # service gwms-factory reconfig
+root@host # systemctl stop gwms-factory
+root@host # /usr/sbin/gwms-factory reconfig
+root@host # systemctl start gwms-factory
+```
 
+If you want to give additional options to the reconfig
+``` console
+root@host # systemctl stop gwms-factory
+root@host # /usr/sbin/gwms-factory reconfig "reconfig options here"
+root@host # systemctl start gwms-factory
+```
+ 
 
-# %RED% But the situation is a bit more complicated in RHEL 7, CentOS 7, and SL7 due to systemd restrictions%ENDCOLOR%
-# %GREEN% For reconfig:%ENDCOLOR%
-A. %RED% when the Factory is running%ENDCOLOR%
-A.1 %RED% without any additional options%ENDCOLOR%
-root@host # /usr/sbin/gwms-factory reconfig%ENDCOLOR%
-or
-root@host # systemctl reload gwms-factory
-
-A.2 %RED% if you want to give additional options %ENDCOLOR%
-systemctl stop gwms-factory
-/usr/sbin/gwms-factory reconfig "and your options"
-systemctl start gwms-factory
-
-B. %RED% when the Factory is NOT running %ENDCOLOR%
-root@host # /usr/sbin/gwms-factory reconfig ("and your options")
-```	
 
 To enable the services so that they restart after a reboot:
 
 ``` console
-# %RED%# For RHEL 6, CentOS 6, and SL6%ENDCOLOR%
-root@host # /sbin/chkconfig fetch-crl-cron on 
-root@host # /sbin/chkconfig fetch-crl-boot on 
-root@host # /sbin/chkconfig condor on
-root@host # /sbin/chkconfig httpd on
-root@host # /sbin/chkconfig gwms-factory on
-# %RED%# For RHEL 7, CentOS 7, and SL7%ENDCOLOR%
 root@host # systemctl enable fetch-crl-cron 
 root@host # systemctl enable fetch-crl-boot
 root@host # systemctl enable condor 
@@ -523,9 +494,6 @@ root@host # systemctl enable gwms-factory
 To stop the Factory:
 
 ```console
-# %RED%For RHEL 6, CentOS 6, and SL6 %ENDCOLOR%
-root@host # service gwms-factory stop
-# %RED%For RHEL 7, CentOS 7, and SL7%ENDCOLOR%
 root@host # systemctl stop gwms-factory
 ```
 
